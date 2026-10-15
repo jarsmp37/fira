@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Analítico y Predictivo | Reto AgroCebada FIRA 2026</title>
+  <meta name="description" content="Dashboard integral y visor geoespacial de modelación biofísica, teledetección multianual y predicción de rendimiento de cebada maltera.">
+
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Estilos Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Estilos Personalizados del Dashboard -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       HEADER INSTITUCIONAL
+       ========================================================================= -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="brand-icon">
+          <!-- Icono SVG Escudo / Hoja Agrícola -->
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"/>
+            <path d="M12 6v6l4 2"/>
+            <path d="M12 22V12"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>FIRA | Reto AgroCebada 2026</h1>
+          <p>Plataforma Geoespacial de Analítica Biofísica y Predicción de Rendimiento</p>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <span class="header-badge badge-live">
+          <span class="pulse-dot"></span>
+          Modelo XGBoost en Producción
+        </span>
+        <span class="header-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Ciclo Multianual 2022 - 2025
+        </span>
+        <span class="header-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          197 Parcelas (138 Train / 59 Pred)
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       BARRA DE NAVEGACIÓN DE PESTAÑAS (6 PESTAÑAS DEDICADAS)
+       ========================================================================= -->
+  <nav class="nav-tabs-wrapper">
+    <div class="nav-tabs-container">
+      <button class="tab-btn active" data-tab="tab-pregunta1" title="Pregunta 1: Índice Satelital (LAI vs NDVI)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        <span class="tab-title">P1: Satélite</span>
+        <span class="tab-pill">LAI</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-pregunta2" title="Pregunta 2: Clima Decisivo (Calor & Lluvia)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <span class="tab-title">P2: Clima</span>
+        <span class="tab-pill">Jun/Jul</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-pregunta3" title="Pregunta 3: Combinación Óptima (4 Pilares)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <span class="tab-title">P3: 4 Pilares</span>
+        <span class="tab-pill">Óptimo</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-territorial" title="Visor Territorial (197 Parcelas)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+          <line x1="8" y1="2" x2="8" y2="18"/>
+          <line x1="16" y1="6" x2="16" y2="22"/>
+        </svg>
+        <span class="tab-title">Visor Territorial</span>
+        <span class="tab-pill">197 Parc</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-modelos-datos" title="Modelos de ML y Datos (Benchmarks & Descarga Excel)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18"/>
+          <path d="M9 21V9"/>
+        </svg>
+        <span class="tab-title">Modelos & Datos</span>
+        <span class="tab-pill">ML</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-pred-map" title="Mapa de Predicción (59 Parcelas)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polygon points="12 8 8 12 12 16 16 12 12 8"/>
+        </svg>
+        <span class="tab-title">Mapa Predicción</span>
+        <span class="tab-pill">59 Parc</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- =========================================================================
+       CONTENIDO PRINCIPAL
+       ========================================================================= -->
+  <main class="main-content">
+
+    <!-- =======================================================================
+         PESTAÑA 1: PREGUNTA 1 - ÍNDICE SATELITAL (LAI vs NDVI)
+         ======================================================================= -->
+    <div id="tab-pregunta1" class="tab-pane active">
+      <div class="section-header">
+        <h2>Pregunta Oficial 1: ¿Qué índice satelital es el más importante para estimar el rendimiento de la cebada?</h2>
+        <p>Comparativa directa del poder predictivo de todos los índices satelitales candidatos, demostrando por qué se seleccionó LAI frente a NDVI, EVI y MSAVI.</p>
+      </div>
+
+      <!-- Banner de Respuesta Oficial -->
+      <div class="official-answer-banner">
+        <div class="banner-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Métrica Ganadora Oficial:
+        </div>
+        <div class="banner-variable-winner">lai_promedio_max</div>
+        <div class="banner-desc">
+          Corresponde al <strong>valor máximo alcanzado por el Índice de Área Foliar promedio</strong> de la parcela durante su punto más frondoso en los meses de floración (julio y agosto).
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Gráfico de Contraste Satelital en Barras -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h3>Contraste de Poder Predictivo: Todos los Índices Satelitales</h3>
+              <p style="font-size:0.8rem; color:var(--text-muted);">Puntuación de correlación y capacidad para anticipar el rendimiento cosechado</p>
+            </div>
+            <span class="card-tag tag-primary">Ranking de Modelación</span>
+          </div>
+          <div class="chart-container" style="height: 310px;">
+            <canvas id="chart-sat-comparison"></canvas>
+          </div>
+          <div class="narrative-box">
+            <p><strong>Storytelling de Decisión:</strong> La barra verde de <code>lai_promedio_max</code> encabeza con un <strong>88% de poder predictivo (correlación +0.68)</strong>, superando con creces al clásico NDVI (54%). Mientras que el NDVI se estanca prematuramente en 0.80 y no distingue una parcela regular de una sobresaliente, el LAI mide capas de follaje vertical m²/m², capturando el verdadero potencial biológico.</p>
+          </div>
+        </div>
+
+        <!-- 4 Razones Prácticas para No Técnicos (Cell 38 Notebook) -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h3>¿Por qué esta métrica y no otra? (Explicación para Evaluadores)</h3>
+              <p style="font-size:0.8rem; color:var(--text-muted);">Cuatro argumentos agronómicos y biofísicos determinantes</p>
+            </div>
+            <span class="card-tag tag-primary">4 Argumentos</span>
+          </div>
+
+          <div class="reasons-grid">
+            <div class="reason-card">
+              <div class="reason-number">Razón 1</div>
+              <div class="reason-title">Mide la Fábrica de Granos</div>
+              <div class="reason-text">
+                El LAI mide exactamente los m² de hojas verdes por m² de suelo. Parcelas con pico superior a <strong>2.2 m²/m²</strong> logran fotosíntesis óptima que llena espigas pesadas con cosechas superiores a <strong>4.2 t/ha</strong>.
+              </div>
+            </div>
+
+            <div class="reason-card">
+              <div class="reason-number">Razón 2</div>
+              <div class="reason-title">Supera la Saturación del NDVI</div>
+              <div class="reason-text">
+                El NDVI tradicional satura en valores cercanos a <strong>0.80</strong> en etapas densas. En cambio, <code>lai_promedio_max</code> sigue midiendo capas de follaje y sí discrimina entre un lote regular (3.5 t/ha) y uno sobresaliente (5.0 t/ha).
+              </div>
+            </div>
+
+            <div class="reason-card">
+              <div class="reason-number">Razón 3</div>
+              <div class="reason-title">Pico Máximo vs Promedio Anual</div>
+              <div class="reason-text">
+                El promedio de todo el año (<code>_mean</code>) diluye el cálculo con meses donde la tierra estaba recién arada (mayo) o seca (octubre). El pico captura la foto exacta de la planta en su momento de máxima necesidad.
+              </div>
+            </div>
+
+            <div class="reason-card">
+              <div class="reason-number">Razón 4</div>
+              <div class="reason-title">Promedio del Lote vs Punto Aislado</div>
+              <div class="reason-text">
+                Se utiliza <code>lai_promedio_max</code> (promedio del predio) y no <code>lai_max</code> puntual, porque un valor puntual puede corresponder a un árbol o maleza en la orilla, mientras que el promedio evalúa la salud pareja de todo el sembradío.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =======================================================================
+         PESTAÑA 2: PREGUNTA 2 - CLIMA DECISIVO (CALOR & LLUVIA)
+         ======================================================================= -->
+    <div id="tab-pregunta2" class="tab-pane">
+      <div class="section-header">
+        <h2>Pregunta Oficial 2: ¿Qué variable climática tiene el mayor peso en la producción de cebada?</h2>
+        <p>Ranking de impacto de todas las variables climáticas del año, mostrando el contraste exacto entre los factores decisivos y los meses sin influencia.</p>
+      </div>
+
+      <!-- Banner de Respuesta Oficial -->
+      <div class="official-answer-banner amber-tone">
+        <div class="banner-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          Variables Decisivas Oficiales:
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin:0.3rem 0;">
+          <span class="banner-variable-winner">tmin_jun_c (Noches Junio: +0.56)</span>
+          <span class="banner-variable-winner" style="color:#b91c1c;">prec_jun_mm (Lluvia Junio: -0.48)</span>
+          <span class="banner-variable-winner" style="color:#b91c1c;">tmax_jul_c (Calor Julio: -0.35)</span>
+        </div>
+        <div class="banner-desc">
+          En el Altiplano Central (Hidalgo, Puebla y Tlaxcala), la suerte del ciclo de temporal se define en <strong>junio</strong> (nacencia e implantación radicular) y en <strong>julio</strong> (cuajado de grano y floración).
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Gráfico Bipolar Divergente de Relevancia Climática -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h3>Ranking Climático: Impacto Favorable (+) vs Daño Agronómico (-)</h3>
+              <p style="font-size:0.8rem; color:var(--text-muted);">Asociación directa aislada de cada variable climática mensual frente al rendimiento</p>
+            </div>
+            <span class="card-tag tag-amber">Contraste Anual</span>
+          </div>
+          <div class="chart-container" style="height: 310px;">
+            <canvas id="chart-climate-ranking"></canvas>
+          </div>
+          <div class="narrative-box amber">
+            <p><strong>Storytelling de Decisión:</strong> La gráfica demuestra visualmente que el resto del año tiene un impacto neutro o secundario. Las tres barras dominantes definen la cosecha: <strong>Tmin Junio (+0.56 verde)</strong> acelera el amacollamiento, mientras que <strong>Lluvia Junio (-0.48 rojo)</strong> y <strong>Tmax Julio (-0.35 rojo)</strong> son los dos frenos destructivos por asfixia radicular y estrés térmico.</p>
+          </div>
+        </div>
+
+        <!-- Tarjetas Descriptivas de los 3 Factores Decisivos -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h3>Mecanismos Biológicos de las 3 Variables Decisivas</h3>
+              <p style="font-size:0.8rem; color:var(--text-muted);">Por qué estas variables y no las de otros meses</p>
+            </div>
+            <span class="card-tag tag-primary">Mecanismo Agronómico</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div class="reason-card" style="border-left: 4px solid #16a34a;">
+              <div class="reason-title" style="color:#15803d;">1. Noches Templadas de Junio (<code>tmin_jun_c</code>: +0.56)</div>
+              <div class="reason-text">
+                Cuando la semilla germina, mínimas nocturnas entre <strong>9 °C y 10 °C</strong> aceleran la termogénesis y generan plantas con múltiples tallos productivos (> 4.3 t/ha). Noches frías (6–7 °C) entumen la plántula y estancan el rendimiento (< 3.2 t/ha).
+              </div>
+            </div>
+
+            <div class="reason-card" style="border-left: 4px solid #b91c1c;">
+              <div class="reason-title" style="color:#b91c1c;">2. Exceso de Lluvia en Nacencia (<code>prec_jun_mm</code>: -0.48)</div>
+              <div class="reason-text">
+                Precipitaciones superiores a <strong>120 mm en junio</strong> en terrenos planos (< 2°) causan anegamiento y pudrición de raíces jóvenes (< 3.2 t/ha). En cambio, parcelas con lluvia moderada (75–95 mm) o laderas con drenaje rinden > 4.5 t/ha.
+              </div>
+            </div>
+
+            <div class="reason-card" style="border-left: 4px solid #d97706;">
+              <div class="reason-title" style="color:#d97706;">3. Umbral Crítico de Calor en Julio (<code>tmax_jul_c</code>: -0.35)</div>
+              <div class="reason-text">
+                En floración y antesis, si la temperatura de la tarde excede los <strong>22.8 °C</strong>, la flor sufre aborto térmico y el grano no cuaja, provocando espigas vanas y desplomando la cosecha.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =======================================================================
+         PESTAÑA 3: PREGUNTA 3 - COMBINACIÓN ÓPTIMA (4 PILARES & VIF)
+         ======================================================================= -->
+    <div id="tab-pregunta3" class="tab-pane">
+      <div class="section-header">
+        <h2>Pregunta Oficial 3: ¿Qué combinación de variables funciona mejor para anticipar la cosecha?</h2>
+        <p>El Motor Biofísico de 4 Pilares: justificación de la selección de características frente a la duplicidad de información (VIF).</p>
+      </div>
+
+      <!-- Banner de Respuesta Oficial -->
+      <div class="official-answer-banner blue-tone">
+        <div class="banner-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Combinación Ganadora Oficial: Motor Biofísico de 4 Pilares
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin:0.4rem 0 0.6rem 0;">
+          <span class="banner-variable-winner" style="color:#0284c7; border: 1px solid #bae6fd; background:#ffffff;">Pilar 1 (Vigor Foliar): lai_promedio_max</span>
+          <span class="banner-variable-winner" style="color:#16a34a; border: 1px solid #bbf7d0; background:#ffffff;">Pilar 2 (Clima Nacencia): tmin_jun_c + prec_jun_mm</span>
+          <span class="banner-variable-winner" style="color:#d97706; border: 1px solid #fde68a; background:#ffffff;">Pilar 3 (Piso Bioclimático): elevacion_msnm + Estado</span>
+          <span class="banner-variable-winner" style="color:#7c3aed; border: 1px solid #ddd6fe; background:#ffffff;">Pilar 4 (Manejo & Escala): log(AREA_HA)</span>
+        </div>
+        <div class="banner-desc">
+          <strong>Respuesta Conclusiva Oficial:</strong> La combinación que mejor predice el rendimiento es la integración de estos <strong>4 pilares biofísicos</strong>. Cubre el 100% de la realidad agronómica del cultivo (salud foliar pico en floración, implantación en junio, piso térmico regional y escala de manejo) sin duplicidad de datos (todas las variables con factor de multicolinealidad <strong>VIF &lt; 2.5 en semáforo verde</strong>), garantizando la mayor precisión y estabilidad predictiva en el modelo XGBoost.
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Gráfico 3A: Importancia de los 4 Pilares -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h3>Aporte de los 4 Pilares en el Modelo Predictivo (%)</h3>
+              <p style="font-size:0.8rem; color:var(--text-muted);">Importancia relativa de cada pilar biofísico en la predicción final de XGBoost</p>
+            </div>
+            <span class="card-tag tag-primary">Importancia de Características</span>
+          </div>
+          <div class="chart-container" style="height: 290px;">
+            <canvas id="chart-pillars-importance"></canvas>
+          </div>
+          <div class="narrative-box blue">
+            <p><strong>Storytelling de Decisión:</strong> Los 4 pilares capturan de forma balanceada: <strong>1)</strong> Cómo llegó la planta a floración (38.5%), <strong>2)</strong> Cómo nació en junio (31.2%), <strong>3)</strong> En qué microclima se encuentra (18.1%), y <strong>4)</strong> Qué tipo de manejo agronómico recibe por su escala predial (12.2%).</p>
+          </div>
+        </div>
+
+        <!-- Gráfico 3B: Semáforo de Duplicidad VIF -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <h3>Diagnóstico de Duplicidad: Variables Descartadas vs Seleccionadas (VIF)</h3>
+              <p style="font-size:0.8rem; color:var(--text-muted);">Factor de Inflación de Varianza (Límite Rojo de Alerta: VIF &ge; 10)</p>
+            </div>
+            <span class="card-tag tag-amber">Semáforo VIF</span>
+          </div>
+          <div class="chart-container" style="height: 290px;">
+            <canvas id="chart-vif-comparison"></canvas>
+          </div>
+          <div class="narrative-box">
+            <p><strong>Storytelling de Decisión:</strong> Si ingresáramos todas las variables satelitales (MSAVI, EVI, NDVI), las barras rojas (VIF &gt; 12) descalibrarían el modelo por duplicidad. Al podarlas y conservar solo los 4 pilares, las variables seleccionadas operan en zona verde (VIF &lt; 5.0), garantizando estabilidad matemática.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =======================================================================
+         PESTAÑA 4: VISOR TERRITORIAL MULTIANUAL Y SEMANAL (197 PARCELAS)
+         ======================================================================= -->
+    <div id="tab-territorial" class="tab-pane">
+      <div class="section-header">
+        <h2>Visor Territorial Multianual y Semanal (197 Parcelas)</h2>
+        <p>Explora sobre el mapa callejero oficial de Google Maps la evolución semanal de las 197 parcelas en Hidalgo, Puebla y Tlaxcala durante los ciclos 2022 a 2025.</p>
+      </div>
+
+      <div class="map-wrapper">
+        <div id="map-territorial" class="map-container"></div>
+
+        <!-- Controles Flotantes -->
+        <div class="map-control-floating">
+          <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Controles del Visor
+          </h4>
+
+          <div class="control-group">
+            <span class="control-label">Año Agrícola:</span>
+            <div class="year-btn-group">
+              <button class="year-btn" data-year="2022">2022</button>
+              <button class="year-btn" data-year="2023">2023</button>
+              <button class="year-btn" data-year="2024">2024</button>
+              <button class="year-btn active" data-year="2025">2025</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <span class="control-label">Variable a Visualizar:</span>
+            <div class="layer-radio-list">
+              <label class="layer-radio-item">
+                <input type="radio" name="var-layer" value="lai" checked>
+                <span>Índice LAI (Área Foliar m²/m²)</span>
+              </label>
+              <label class="layer-radio-item">
+                <input type="radio" name="var-layer" value="ndvi">
+                <span>Índice NDVI (Verdor Vegetativo)</span>
+              </label>
+              <label class="layer-radio-item">
+                <input type="radio" name="var-layer" value="prec">
+                <span>Precipitación Acumulada Semanal</span>
+              </label>
+              <label class="layer-radio-item">
+                <input type="radio" name="var-layer" value="tmin">
+                <span>Temperatura Mínima Nocturna</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leyenda Dinámica -->
+        <div class="map-legend">
+          <div id="legend-title" class="legend-title">Índice LAI (Área Foliar)</div>
+          <div id="legend-bar" class="legend-bar"></div>
+          <div class="legend-labels">
+            <span id="legend-min">0.0</span>
+            <span id="legend-max">2.5+</span>
+          </div>
+        </div>
+
+        <!-- Barra de Línea de Tiempo -->
+        <div class="map-timeline-bar">
+          <div class="timeline-info-row">
+            <div id="timeline-week-label" class="timeline-title">Sem 20 (37): 11-17 Sep</div>
+            <div id="timeline-phase-label" class="timeline-phase">Pico de biomasa foliar</div>
+          </div>
+          <div class="timeline-controls-row">
+            <button id="btn-play-timeline" class="play-btn" title="Reproducir evolución semanal">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <input id="timeline-slider" type="range" class="timeline-slider" min="0" max="26" value="19" step="1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =======================================================================
+         PESTAÑA 5: MODELOS PREDICTIVOS & DATAFRAME
+         ======================================================================= -->
+    <div id="tab-modelos-datos" class="tab-pane">
+      <div class="section-header">
+        <h2>Benchmarking de Modelos de Machine Learning & DataFrame de Predicciones</h2>
+        <p>Evaluación con validación cruzada estratificada en 10 pliegues (10-Fold CV) y tabla oficial con descarga directa en Excel y CSV.</p>
+      </div>
+
+      <!-- Comparativo de Modelos ML -->
+      <div class="benchmark-grid">
+        <!-- Tarjeta Modelo Ganador: XGBoost -->
+        <div class="model-card winner">
+          <span class="winner-badge">Oficial Seleccionado</span>
+          <div class="model-header">
+            <h4>XGBoost Regressor</h4>
+            <div class="model-sub">Boosting por Gradiente Optimizado</div>
+          </div>
+          <div class="metrics-list">
+            <div class="metric-row"><span class="metric-name">RMSE OOF:</span><span class="metric-val highlight">0.549 t/ha</span></div>
+            <div class="metric-row"><span class="metric-name">MAE OOF:</span><span class="metric-val highlight">0.411 t/ha</span></div>
+            <div class="metric-row"><span class="metric-name">R² Coeficiente:</span><span class="metric-val highlight">0.580</span></div>
+            <div class="metric-row"><span class="metric-name">MAPE Error %:</span><span class="metric-val highlight">11.71%</span></div>
+            <div class="metric-row"><span class="metric-name">10-Fold CV RMSE:</span><span class="metric-val">0.516 ± 0.186</span></div>
+            <div class="metric-row"><span class="metric-name">ROC AUC:</span><span class="metric-val highlight">0.921</span></div>
+            <div class="metric-row"><span class="metric-name">Precisión Global:</span><span class="metric-val highlight">90.6%</span></div>
+          </div>
+          <div class="cm-container">
+            <div class="cm-cell tp"><div class="cm-cell-label">Verd. Pos. (TP)</div><div class="cm-cell-val">74</div></div>
+            <div class="cm-cell tn"><div class="cm-cell-label">Verd. Neg. (TN)</div><div class="cm-cell-val">51</div></div>
+            <div class="cm-cell fp"><div class="cm-cell-label">Falso Pos. (FP)</div><div class="cm-cell-val">8</div></div>
+            <div class="cm-cell fn"><div class="cm-cell-label">Falso Neg. (FN)</div><div class="cm-cell-val">5</div></div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Random Forest -->
+        <div class="model-card">
+          <div class="model-header">
+            <h4>Random Forest Regressor</h4>
+            <div class="model-sub">Ensamble Bagging de Árboles</div>
+          </div>
+          <div class="metrics-list">
+            <div class="metric-row"><span class="metric-name">RMSE OOF:</span><span class="metric-val">0.558 t/ha</span></div>
+            <div class="metric-row"><span class="metric-name">MAE OOF:</span><span class="metric-val">0.418 t/ha</span></div>
+            <div class="metric-row"><span class="metric-name">R² Coeficiente:</span><span class="metric-val">0.567</span></div>
+            <div class="metric-row"><span class="metric-name">MAPE Error %:</span><span class="metric-val">11.82%</span></div>
+            <div class="metric-row"><span class="metric-name">10-Fold CV RMSE:</span><span class="metric-val">0.528 ± 0.179</span></div>
+            <div class="metric-row"><span class="metric-name">ROC AUC:</span><span class="metric-val">0.914</span></div>
+            <div class="metric-row"><span class="metric-name">Precisión Global:</span><span class="metric-val">90.6%</span></div>
+          </div>
+          <div class="cm-container">
+            <div class="cm-cell tp"><div class="cm-cell-label">Verd. Pos. (TP)</div><div class="cm-cell-val">74</div></div>
+            <div class="cm-cell tn"><div class="cm-cell-label">Verd. Neg. (TN)</div><div class="cm-cell-val">51</div></div>
+            <div class="cm-cell fp"><div class="cm-cell-label">Falso Pos. (FP)</div><div class="cm-cell-val">8</div></div>
+            <div class="cm-cell fn"><div class="cm-cell-label">Falso Neg. (FN)</div><div class="cm-cell-val">5</div></div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Ridge -->
+        <div class="model-card">
+          <div class="model-header">
+            <h4>Ridge Regularizado</h4>
+            <div class="model-sub">Regresión Paramétrica L2 Penalizada</div>
+          </div>
+          <div class="metrics-list">
+            <div class="metric-row"><span class="metric-name">RMSE OOF:</span><span class="metric-val">0.575 t/ha</span></div>
+            <div class="metric-row"><span class="metric-name">MAE OOF:</span><span class="metric-val">0.446 t/ha</span></div>
+            <div class="metric-row"><span class="metric-name">R² Coeficiente:</span><span class="metric-val">0.540</span></div>
+            <div class="metric-row"><span class="metric-name">MAPE Error %:</span><span class="metric-val">12.67%</span></div>
+            <div class="metric-row"><span class="metric-name">10-Fold CV RMSE:</span><span class="metric-val">0.548 ± 0.174</span></div>
+            <div class="metric-row"><span class="metric-name">ROC AUC:</span><span class="metric-val">0.914</span></div>
+            <div class="metric-row"><span class="metric-name">Precisión Global:</span><span class="metric-val">86.2%</span></div>
+          </div>
+          <div class="cm-container">
+            <div class="cm-cell tp"><div class="cm-cell-label">Verd. Pos. (TP)</div><div class="cm-cell-val">68</div></div>
+            <div class="cm-cell tn"><div class="cm-cell-label">Verd. Neg. (TN)</div><div class="cm-cell-val">51</div></div>
+            <div class="cm-cell fp"><div class="cm-cell-label">Falso Pos. (FP)</div><div class="cm-cell-val">8</div></div>
+            <div class="cm-cell fn"><div class="cm-cell-label">Falso Neg. (FN)</div><div class="cm-cell-val">11</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla Interactiva DataFrame de las 59 Parcelas de Predicción -->
+      <div class="card">
+        <div class="card-title-row">
+          <div>
+            <h3>DataFrame Oficial de Predicciones del Reto (59 Parcelas)</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted);">Generado con XGBoost Regressor optimizado (4 columnas requeridas por FIRA)</p>
+          </div>
+          <span id="pred-table-count" class="card-tag tag-primary">59 parcelas</span>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="table-search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="search-pred-table" type="text" placeholder="Filtrar por ID, Estado o Municipio...">
+          </div>
+
+          <div class="table-actions">
+            <button id="btn-export-excel" class="btn-export excel">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar Excel (.xlsx)
+            </button>
+            <button id="btn-export-csv" class="btn-export csv">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              Descargar CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID Polígono</th>
+                <th>Estado</th>
+                <th>Municipio</th>
+                <th style="text-align:right;">Área (ha)</th>
+                <th style="text-align:right;">Rendimiento Predicho (t/ha)</th>
+                <th style="text-align:center;">Clasificación</th>
+                <th style="text-align:right;">LAI Máx</th>
+                <th style="text-align:right;">Lluvia Jun (mm)</th>
+                <th style="text-align:right;">Tmin Jun (°C)</th>
+                <th style="text-align:right;">Elevación</th>
+                <th style="text-align:right;">Pendiente</th>
+              </tr>
+            </thead>
+            <tbody id="pred-table-body">
+              <!-- Las filas se cargan dinámicamente con app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- =======================================================================
+         PESTAÑA 6: MAPA FOCALIZADO DE PREDICCIONES (59 PARCELAS)
+         ======================================================================= -->
+    <div id="tab-pred-map" class="tab-pane">
+      <div class="section-header">
+        <h2>Mapa Focalizado de las 59 Parcelas de Predicción (Google Maps Calles)</h2>
+        <p>Visor geoespacial compacto sobre mapa callejero. Selecciona cualquier predio en el menú desplegable para centrarlo y consultar su ficha técnica al instante sin necesidad de desplazarte.</p>
+      </div>
+
+      <!-- Resumen KPI de Predicciones Compacto -->
+      <div class="grid-4col">
+        <div class="kpi-card">
+          <div class="kpi-icon-box emerald">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">Alto Rendimiento (>= 4.0 t/ha)</div>
+            <div class="kpi-value" style="color:var(--high-yield)">36 parcelas</div>
+            <div class="kpi-subtext">61.0% del lote</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-box amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">Rendimiento Marginal (&lt; 4.0 t/ha)</div>
+            <div class="kpi-value" style="color:var(--marginal-yield)">23 parcelas</div>
+            <div class="kpi-subtext">39.0% del lote</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-box blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">Rendimiento Medio Ponderado</div>
+            <div class="kpi-value">4.10 t/ha</div>
+            <div class="kpi-subtext">Rango: 3.01 a 4.93 t/ha</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-box emerald">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">Volumen Total Estimado</div>
+            <div class="kpi-value">1,353.9 t</div>
+            <div class="kpi-subtext">343.32 hectáreas totales</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenedor del Mapa con Selector Desplegable Arriba -->
+      <div class="pred-map-container-box">
+        <!-- Barra de Selección Desplegable Superior -->
+        <div class="parcel-dropdown-bar">
+          <div class="dropdown-control-group">
+            <label for="select-parcel-pred">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Seleccionar Parcela a Inspeccionar:
+            </label>
+            <select id="select-parcel-pred" class="parcel-select-input">
+              <option value="">-- Elige una parcela para centrar en el mapa --</option>
+              <!-- Opciones generadas dinámicamente con app.js -->
+            </select>
+          </div>
+
+          <div id="selected-parcel-pill" class="selected-parcel-pill" style="display:none;">
+            <div class="selected-pill-stat">
+              <span>Parcela:</span>
+              <strong id="pill-id">--</strong>
+            </div>
+            <div class="selected-pill-stat">
+              <span>Predicción:</span>
+              <strong id="pill-yield" style="color:var(--primary-color);">--</strong>
+            </div>
+            <div class="selected-pill-stat">
+              <span>Área:</span>
+              <strong id="pill-area">--</strong>
+            </div>
+            <div class="selected-pill-stat">
+              <span>Municipio:</span>
+              <span id="pill-loc" style="font-weight:600;">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mapa Callejero Compacto (440px de altura para ver todo en pantalla) -->
+        <div class="map-wrapper" style="height: 440px;">
+          <div id="map-prediccion" class="map-container"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- =========================================================================
+       FOOTER INSTITUCIONAL
+       ========================================================================= -->
+  <footer class="dashboard-footer">
+    <div class="footer-container">
+      <div>
+        <strong>Fideicomisos Instituidos en Relación con la Agricultura (FIRA)</strong> | Banco de México<br>
+        Reto Nacional de Ciencia de Datos AgroCebada 2026. Todos los derechos reservados.
+      </div>
+      <div>
+        Diseñado con HTML5, Vanilla CSS & Vanilla JS (Listo para GitHub Pages).
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       LIBRERÍAS EXTERNAS CDN & SCRIPTS DEL DASHBOARD
+       ========================================================================= -->
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- SheetJS para Descargas Directas de Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Datos y Lógica del Dashboard -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
