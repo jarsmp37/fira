@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Analítico y Predictivo | Reto AgroCebada FIRA 2026</title>
   <meta name="description" content="Dashboard integral y visor geoespacial de modelación biofísica, teledetección multianual y predicción de rendimiento de cebada maltera.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 
   <!-- Tipografía Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,11 +58,19 @@
   </header>
 
   <!-- =========================================================================
-       BARRA DE NAVEGACIÓN DE PESTAÑAS (6 PESTAÑAS DEDICADAS)
+       BARRA DE NAVEGACIÓN DE PESTAÑAS (7 PESTAÑAS DEDICADAS)
        ========================================================================= -->
   <nav class="nav-tabs-wrapper">
     <div class="nav-tabs-container">
-      <button class="tab-btn active" data-tab="tab-pregunta1" title="Pregunta 1: Índice Satelital (LAI vs NDVI)">
+      <button class="tab-btn active" data-tab="tab-presentacion" title="Presentación Ejecutiva del Proyecto (Video Pitch Oficial)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <span class="tab-title">Presentación</span>
+        <span class="tab-pill">Video</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-pregunta1" title="Pregunta 1: Índice Satelital (LAI vs NDVI)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
@@ -122,9 +131,120 @@
   <main class="main-content">
 
     <!-- =======================================================================
+         PESTAÑA 0: PRESENTACIÓN EJECUTIVA (VIDEO PITCH OFICIAL)
+         ======================================================================= -->
+    <div id="tab-presentacion" class="tab-pane active">
+      <div class="section-header">
+        <h2>Presentación Ejecutiva del Proyecto (Video Demostrativo Oficial FIRA)</h2>
+        <p>Defensa técnica y ejecutiva: el dolor del financiamiento en el Altiplano Central, los insumos oficiales del reto, la solución analítica biofísica y su impacto en la inclusión financiera rural.</p>
+      </div>
+
+      <div class="video-presentation-wrapper">
+        <div class="video-card">
+          <div class="video-card-header">
+            <div class="video-badge">
+              <span class="pulse-dot"></span>
+              Video Demostrativo Oficial • Reto AgroCebada FIRA 2026
+            </div>
+            <div class="video-meta-actions">
+              <div class="player-toggle-group">
+                <button type="button" id="btn-mode-local" class="btn-toggle active" title="Reproductor nativo integrado (Cero errores de reproducción)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Reproductor HD</span>
+                </button>
+                <button type="button" id="btn-mode-yt" class="btn-toggle" title="Cargar reproductor embebido de YouTube">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  <span>YouTube IFrame</span>
+                </button>
+              </div>
+              <span class="video-tag">Duración: 4:30 min</span>
+              <span class="video-tag">4 Participantes</span>
+              <a href="https://www.youtube.com/watch?v=9h8FVQ9YRw8" target="_blank" rel="noopener noreferrer" class="btn-yt-direct" title="Abrir video directamente en YouTube">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                <span>Ver en YouTube</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+          
+          <div class="video-responsive-frame">
+            <!-- Reproductor Nativo HTML5 HD (Garantiza cero Error 153 en cualquier navegador y modo local file://) -->
+            <video 
+              id="fira-native-video" 
+              controls 
+              preload="metadata" 
+              poster="video/poster.jpg" 
+              playsinline>
+              <source src="video/presentacion_fira.mp4" type="video/mp4">
+              Tu navegador no soporta el reproductor de video HTML5.
+            </video>
+
+            <!-- Iframe alternativo de YouTube -->
+            <iframe 
+              id="fira-yt-iframe"
+              style="display:none;"
+              src="https://www.youtube.com/embed/9h8FVQ9YRw8" 
+              title="Presentación Ejecutiva | Reto AgroCebada FIRA 2026" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              referrerpolicy="strict-origin-when-cross-origin" 
+              allowfullscreen>
+            </iframe>
+          </div>
+
+          <div class="video-direct-bar">
+            <div class="video-direct-info">
+              <span id="player-status-badge" class="badge-success-indicator">● Reproductor Nativo HD Activo</span>
+              <span id="player-status-desc">Video oficial integrado localmente (cero dependencias de cookies ni Error 153).</span>
+            </div>
+            <a href="https://www.youtube.com/watch?v=9h8FVQ9YRw8" target="_blank" rel="noopener noreferrer" class="video-direct-link">
+              <span>https://www.youtube.com/watch?v=9h8FVQ9YRw8</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+
+          <div class="video-card-footer">
+            <div class="video-summary-grid">
+              <div class="video-summary-item">
+                <div class="summary-num">01</div>
+                <div class="summary-text">
+                  <strong>El Dolor del Campo</strong>
+                  Asimetría de información en Hidalgo, Puebla y Tlaxcala. 80% de productores de temporal sin acceso a crédito ágil.
+                </div>
+              </div>
+              <div class="video-summary-item">
+                <div class="summary-num">02</div>
+                <div class="summary-text">
+                  <strong>Insumos del Reto</strong>
+                  197 parcelas georreferenciadas (70% calibración / 30% evaluación a ciegas), satélite Planet/Sentinel y clima ráster.
+                </div>
+              </div>
+              <div class="video-summary-item">
+                <div class="summary-num">03</div>
+                <div class="summary-text">
+                  <strong>Motor de 4 Pilares</strong>
+                  Respuesta a las 3 preguntas: LAI foliar (+0.68), clima bipolar de junio/julio y VIF &lt; 2.5 en semáforo verde.
+                </div>
+              </div>
+              <div class="video-summary-item">
+                <div class="summary-num">04</div>
+                <div class="summary-text">
+                  <strong>Impacto FIRA</strong>
+                  Modelo XGBoost (AUC 0.921, exactitud 90.6%) que reduce 60% el costo de originación para intermediarios financieros.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =======================================================================
          PESTAÑA 1: PREGUNTA 1 - ÍNDICE SATELITAL (LAI vs NDVI)
          ======================================================================= -->
-    <div id="tab-pregunta1" class="tab-pane active">
+    <div id="tab-pregunta1" class="tab-pane">
       <div class="section-header">
         <h2>Pregunta Oficial 1: ¿Qué índice satelital es el más importante para estimar el rendimiento de la cebada?</h2>
         <p>Comparativa directa del poder predictivo de todos los índices satelitales candidatos, demostrando por qué se seleccionó LAI frente a NDVI, EVI y MSAVI.</p>

@@ -4,6 +4,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
+  initVideoPlayer();
   initStorytellingCharts();
   initTerritorialMap();
   initPredictionTable();
@@ -33,6 +34,12 @@ function initTabs() {
         targetPane.classList.add("active");
       }
 
+      // Si el usuario cambia de pestaña, pausar video nativo para no dejar audio activo
+      const nativeVid = document.getElementById("fira-native-video");
+      if (nativeVid && targetId !== "tab-presentacion") {
+        nativeVid.pause();
+      }
+
       // Re-calcular tamaño de los mapas al mostrar su pestaña
       setTimeout(() => {
         if (targetId === "tab-territorial" && mapTerritorial) {
@@ -40,8 +47,52 @@ function initTabs() {
         } else if (targetId === "tab-pred-map" && mapPrediction) {
           mapPrediction.invalidateSize();
         }
+        window.dispatchEvent(new Event("resize"));
       }, 120);
     });
+  });
+}
+
+// -----------------------------------------------------------------------------
+// 1.1 REPRODUCTOR DE VIDEO (NATIVO HD + TOGGLE YOUTUBE IFRAME)
+// -----------------------------------------------------------------------------
+function initVideoPlayer() {
+  const btnModeLocal = document.getElementById("btn-mode-local");
+  const btnModeYt = document.getElementById("btn-mode-yt");
+  const nativeVid = document.getElementById("fira-native-video");
+  const ytIframe = document.getElementById("fira-yt-iframe");
+  const statusBadge = document.getElementById("player-status-badge");
+  const statusDesc = document.getElementById("player-status-desc");
+
+  if (!btnModeLocal || !btnModeYt || !nativeVid || !ytIframe) return;
+
+  btnModeLocal.addEventListener("click", () => {
+    btnModeLocal.classList.add("active");
+    btnModeYt.classList.remove("active");
+    nativeVid.style.display = "block";
+    ytIframe.style.display = "none";
+    if (statusBadge) {
+      statusBadge.className = "badge-success-indicator";
+      statusBadge.textContent = "● Reproductor Nativo HD Activo";
+    }
+    if (statusDesc) {
+      statusDesc.textContent = "Video oficial integrado localmente (cero dependencias de cookies ni Error 153).";
+    }
+  });
+
+  btnModeYt.addEventListener("click", () => {
+    btnModeYt.classList.add("active");
+    btnModeLocal.classList.remove("active");
+    nativeVid.pause();
+    nativeVid.style.display = "none";
+    ytIframe.style.display = "block";
+    if (statusBadge) {
+      statusBadge.className = "badge-yt-indicator";
+      statusBadge.textContent = "● Modo YouTube IFrame";
+    }
+    if (statusDesc) {
+      statusDesc.textContent = "Si tu navegador o política local muestra Error 153, regresa a Reproductor HD o pulsa Ver en YouTube.";
+    }
   });
 }
 
